@@ -1,23 +1,18 @@
-import Link from "next/link";
-import { use } from "react";
 import "../styles/globals.css";
 import { Todo } from "../types";
-import { usePathname } from "next/navigation";
+import Aside from "./aside";
 
 async function getData() {
   const res = await fetch("https://jsonplaceholder.typicode.com/todos");
   return res.json() as Promise<Todo[]>;
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const data = use(getData());
-  const pathname = usePathname();
-  // TODO: split pathname from e.g. `/static/100` to ["", "static", "100"]
-  // and update style of link component
+  const data = await getData();
   return (
     <html lang="en">
       <head>
@@ -29,27 +24,11 @@ export default function RootLayout({
         <header className="pt-3 pb-6">
           <p className="text-xl">JSON Placeholder - Next 13</p>
         </header>
-        <div className="grid grid-cols-2 min-h-max">
-          <aside className="sticky top-0">
-            <div className="grid gap-1">
-              {data.map((todo) => {
-                return (
-                  <div
-                    key={todo.id}
-                    className="flex justify-between border-b pb-1 text-sm"
-                  >
-                    <p>{todo.title}</p>
-                    <p className="flex gap-1 underline">
-                      <Link href={`/server/${todo.id}`}>server</Link>
-                      <Link href={`/client/${todo.id}`}>client</Link>
-                      <Link href={`/static/${todo.id}`}>static</Link>
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+        <div className="grid grid-cols-2 gap-8">
+          <aside className="sticky top-0 overflow-y-auto h-56">
+            <Aside data={data} />
           </aside>
-          <main className="overflow-auto">{children}</main>
+          <main>{children}</main>
         </div>
       </body>
     </html>
